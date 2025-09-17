@@ -1,0 +1,26 @@
+[features]
+seeds = true
+skip-lint = false
+
+[programs.localnet]
+ibom_registry = "6rozMzrUPYqBkvmrc5VXJEP2d4Kc4AK1oXz9PDi8bBas"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "node"
+
+
+
+
+
+
+
+
+[programs.devnet]
+ibom_registry = "6rozMzrUPYqBkvmrc5VXJEP2d4Kc4AK1oXz9PDi8bBas"

@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "programs/*"
+]
+
+[workspace.dependencies]
+anchor-lang = "0.31.1"
+
+[profile.release]
+overflow-checks = true

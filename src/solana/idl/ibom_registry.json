@@ -1,0 +1,68 @@
+{
+  "version": "0.1.0",
+  "name": "ibom_registry",
+  "instructions": [
+    {
+      "name": "registerWork",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "work", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "workId", "type": { "array": ["u8", 32] } },
+        { "name": "metadataUri", "type": "string" },
+        { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
+        { "name": "creators", "type": { "vec": { "defined": "creatorShare" } } }
+      ]
+    },
+    {
+      "name": "updateWork",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "work", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "metadataUri", "type": "string" },
+        { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
+        { "name": "creators", "type": { "vec": { "defined": "creatorShare" } } }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Work",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "bump", "type": "u8" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "workId", "type": { "array": ["u8", 32] } },
+          { "name": "metadataUri", "type": "string" },
+          { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
+          { "name": "creators", "type": { "vec": { "defined": "CreatorShare" } } },
+          { "name": "registeredAt", "type": "i64" },
+          { "name": "version", "type": "u32" }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "creatorShare",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "pubkey", "type": "publicKey" },
+          { "name": "share", "type": "u16" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "UriTooLong", "msg": "metadata_uri exceeds MAX_URI_LEN" },
+    { "code": 6001, "name": "TooManyCreators", "msg": "creators length exceeds MAX_CREATORS" },
+    { "code": 6002, "name": "InvalidSharesSum", "msg": "sum(creators.share) must equal 10000 basis points" }
+  ],
+  "metadata": { "address": "IBoMReg1strY1111111111111111111111111111111" }
+}
