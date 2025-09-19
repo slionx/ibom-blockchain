@@ -13,7 +13,7 @@
         { "name": "workId", "type": { "array": ["u8", 32] } },
         { "name": "metadataUri", "type": "string" },
         { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
-        { "name": "creators", "type": { "vec": { "defined": "creatorShare" } } }
+        { "name": "creators", "type": { "vec": { "defined": "CreatorShare" } } }
       ]
     },
     {
@@ -25,7 +25,29 @@
       "args": [
         { "name": "metadataUri", "type": "string" },
         { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
-        { "name": "creators", "type": { "vec": { "defined": "creatorShare" } } }
+        { "name": "creators", "type": { "vec": { "defined": "CreatorShare" } } }
+      ]
+    },
+    {
+      "name": "linkMint",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "work", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "nftMint", "type": "publicKey" },
+        { "name": "collection", "type": { "option": "publicKey" } }
+      ]
+    },
+    {
+      "name": "setPricing",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "work", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "paymentMint", "type": { "option": "publicKey" } },
+        { "name": "price", "type": { "option": "u64" } }
       ]
     }
   ],
@@ -42,14 +64,18 @@
           { "name": "fingerprintHash", "type": { "array": ["u8", 32] } },
           { "name": "creators", "type": { "vec": { "defined": "CreatorShare" } } },
           { "name": "registeredAt", "type": "i64" },
-          { "name": "version", "type": "u32" }
+          { "name": "version", "type": "u32" },
+          { "name": "linkedMint", "type": { "option": "publicKey" } },
+          { "name": "collection", "type": { "option": "publicKey" } },
+          { "name": "paymentMint", "type": { "option": "publicKey" } },
+          { "name": "price", "type": { "option": "u64" } }
         ]
       }
     }
   ],
   "types": [
     {
-      "name": "creatorShare",
+      "name": "CreatorShare",
       "type": {
         "kind": "struct",
         "fields": [
@@ -62,7 +88,8 @@
   "errors": [
     { "code": 6000, "name": "UriTooLong", "msg": "metadata_uri exceeds MAX_URI_LEN" },
     { "code": 6001, "name": "TooManyCreators", "msg": "creators length exceeds MAX_CREATORS" },
-    { "code": 6002, "name": "InvalidSharesSum", "msg": "sum(creators.share) must equal 10000 basis points" }
+    { "code": 6002, "name": "InvalidSharesSum", "msg": "sum(creators.share) must equal 10000 basis points" },
+    { "code": 6003, "name": "Unauthorized", "msg": "only authority can modify this work" }
   ],
   "metadata": { "address": "IBoMReg1strY1111111111111111111111111111111" }
 }

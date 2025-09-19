@@ -647,6 +647,32 @@ export default function NftPage() {
         >
           查看合集作品（日志输出）
         </button>
+        <button
+          className="px-4 py-2 rounded bg-emerald-600 text-white disabled:opacity-50"
+          onClick={async () => {
+            try {
+              if (!lastSongMint) throw new Error("请先铸造歌曲");
+              // workId: 与登记一致，取 mint 的 sha256 作为 workIdHex
+              const enc = new TextEncoder();
+              const digest = await crypto.subtle.digest("SHA-256", enc.encode(lastSongMint));
+              const hex = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+              const res = await fetch("/api/registry/link-mint", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ workIdHex: hex, nftMint: lastSongMint, collectionMint: collectionMint || null }),
+              });
+              const j = await res.json();
+              if (!res.ok || !j?.ok) throw new Error(j?.error || `HTTP ${res.status}`);
+              log(`已绑定登记：sig=${j.signature} work=${j.work}`);
+            } catch (e: any) {
+              log(`绑定登记失败: ${e?.message || e}`);
+            }
+          }}
+          disabled={!wallet.connected || !lastSongMint}
+          title={!wallet.connected ? "请先连接钱包" : (!lastSongMint ? "请先铸造歌曲" : "登记绑定 NFT/合集 到 ibom_registry")}
+        >
+          登记绑定 NFT/合集（link_mint）
+        </button>
       </div>
 
       {/* 就绪状态面板 */}

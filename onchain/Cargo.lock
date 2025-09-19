@@ -646,6 +646,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ibom_splitter"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "indexmap"
 version = "2.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,26 +1,23 @@
+[toolchain]
+
 [features]
-seeds = true
+resolution = true
 skip-lint = false
+
+[programs.devnet]
+ibom_registry = "6rozMzrUPYqBkvmrc5VXJEP2d4Kc4AK1oXz9PDi8bBas"
+ibom_splitter = "63GQo7QyXMRzcjjhTHhccUDvjQLaDAvM4j9Avz45Y3iC"
 
 [programs.localnet]
 ibom_registry = "6rozMzrUPYqBkvmrc5VXJEP2d4Kc4AK1oXz9PDi8bBas"
+ibom_splitter = "63GQo7QyXMRzcjjhTHhccUDvjQLaDAvM4j9Avz45Y3iC"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "node"
-
-
-
-
-
-
-
-
-[programs.devnet]
-ibom_registry = "6rozMzrUPYqBkvmrc5VXJEP2d4Kc4AK1oXz9PDi8bBas"

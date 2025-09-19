@@ -51,6 +51,31 @@ pub mod ibom_registry {
         work.version = work.version.saturating_add(1);
         Ok(())
     }
+    /// Link NFT mint and optional collection to an existing Work
+    pub fn link_mint(
+        ctx: Context<ConfigureWork>,
+        nft_mint: Pubkey,
+        collection: Option<Pubkey>,
+    ) -> Result<()> {
+        let work = &mut ctx.accounts.work;
+        require_keys_eq!(work.authority, ctx.accounts.authority.key(), RegistryError::Unauthorized);
+        work.linked_mint = Some(nft_mint);
+        work.collection = collection;
+        Ok(())
+    }
+
+    /// Configure payment mint and optional price (smallest unit)
+    pub fn set_pricing(
+        ctx: Context<ConfigureWork>,
+        payment_mint: Option<Pubkey>,
+        price: Option<u64>,
+    ) -> Result<()> {
+        let work = &mut ctx.accounts.work;
+        require_keys_eq!(work.authority, ctx.accounts.authority.key(), RegistryError::Unauthorized);
+        work.payment_mint = payment_mint;
+        work.price = price;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -91,6 +116,11 @@ pub struct Work {
     pub creators: Vec<CreatorShare>, // <= MAX_CREATORS
     pub registered_at: i64,
     pub version: u32,
+    // Optional extensions
+    pub linked_mint: Option<Pubkey>,
+    pub collection: Option<Pubkey>,
+    pub payment_mint: Option<Pubkey>,
+    pub price: Option<u64>,
 }
 
 impl Work {
@@ -103,6 +133,8 @@ impl Work {
         const I64: usize = 8;
         const U32: usize = 4;
         const CREATOR: usize = PUBKEY + 2; // pubkey + u16 share
+        const OPTION_PUBKEY: usize = 1 + PUBKEY; // tag + pubkey
+        const OPTION_U64: usize = 1 + 8; // tag + u64
 
         DISCRIMINATOR
             + BUMP
@@ -113,6 +145,10 @@ impl Work {
             + U32 + (MAX_CREATORS * CREATOR)
             + I64
             + U32
+            + OPTION_PUBKEY // linked_mint
+            + OPTION_PUBKEY // collection
+            + OPTION_PUBKEY // payment_mint
+            + OPTION_U64    // price
     }
 }
 
@@ -130,4 +166,21 @@ pub enum RegistryError {
     TooManyCreators,
     #[msg("sum(creators.share) must equal 10000 basis points")] 
     InvalidSharesSum,
+    #[msg("only authority can modify this work")] 
+    Unauthorized,
 }
+
+#[derive(Accounts)]
+pub struct ConfigureWork<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(
+        mut,
+        has_one = authority,
+        seeds = [b"work", work.authority.as_ref(), &work.work_id],
+        bump = work.bump,
+    )]
+    pub work: Account<'info, Work>,
+}
+
+// end

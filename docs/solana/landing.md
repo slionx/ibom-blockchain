@@ -125,6 +125,65 @@ Anchor 校验要点：
 
 ---
 
+### 面向音乐场景的模块化合约设计（落地建议）
+
+本项目建议将“登记/定价/分账”拆为独立职责，避免巨石合约：
+
+- 版权登记 Registry（已具备 ibom_registry，可做轻量扩展）
+  - 现有：`register_work(work_id, metadata_uri, fingerprint_hash, creators_bp)` 与 `update_work(...)`。
+  - 建议新增字段（可选）：
+    - `linked_mint: Option<Pubkey>`：与作品绑定的 NFT Mint（便于检索/映射）。
+    - `collection: Option<Pubkey>`：归属合集（便于按合集查 Work）。
+    - `payment_mint: Option<Pubkey>`：建议结算币种（如 USDC）。
+    - `price: Option<u64>`：建议价格（以最小单位，USDC 为 6 位）。
+  - 备注：保持 Registry 为“权威分润表”，二级市场版税仍以 on-chain Metadata 的 `creators/share` 与 `seller_fee_basis_points` 为准。
+
+- 最小分账 Splitter（新增 Program，MVP）
+  - 目标：将销售/分发等收入打入池子，成员按份额可领取（SOL/SPL）。
+  - 账户草图：
+    ```rust
+    #[account]
+    pub struct Pool {
+      pub bump: u8,
+      pub authority: Pubkey,         // 管理员/维护者
+      pub registry_work: Pubkey,     // 关联的作品（可选）
+      pub token_mint: Option<Pubkey>,// None 表示 SOL；Some 为 SPL mint
+      pub shares: Vec<MemberShare>,  // { pubkey, bp } 和为 10000
+      pub total_received: u64,       // 已入金总额
+      pub claimed: Vec<MemberClaim>, // 每成员已领取
+      pub version: u32,
+    }
+
+    #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+    pub struct MemberShare { pub pubkey: Pubkey, pub bp: u16 }
+    #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+    pub struct MemberClaim { pub pubkey: Pubkey, pub amount: u64 }
+    ```
+  - 指令草图：
+    ```rust
+    // 初始化池，按 registry 的 creators_bp 写入份额
+    init_pool(work: Pubkey, token_mint: Option<Pubkey>, shares: Vec<MemberShare>)
+    // 入金（SOL）
+    fund_sol(amount: u64)
+    // 入金（SPL），从 payer ATA 转入池子 ATA
+    fund_spl(amount: u64)
+    // 成员按可提金额领取（SOL）
+    claim_sol(member)
+    // 成员按可提金额领取（SPL）
+    claim_spl(member)
+    // 更新份额（仅 authority，需版本号/冻结窗口）
+    set_shares(new_shares)
+    ```
+  - 结算要点：可提金额 = `total_received * bp/10000 - already_claimed`，需要对 `claimed` 做累加存档。
+
+- 定价/上架（可选）
+  - 轻量：将 `payment_mint/price` 存在 Registry，前端/后端遵守即可。
+  - 完整：对接 Auction House 做上架/成交；成交后将资金打入 Splitter 的池子再行领取。
+
+> 说明：NFT 与 Registry/分账保持解耦。on-chain Metadata 的 `creators/share` 用于生态（版税显示/二级市场），Registry 的 `creators_bp` 作为你们结算的“权威份额表”。
+
+---
+
 ## 本地测试与部署
 本地测试：
 ```bash
@@ -256,6 +315,17 @@ UI 集成：
 - 租金与空间：预估账户空间，保证 `rent_exempt`；避免频繁重建账户。
 - 升级策略：开发阶段保留升级权限；上线后可交给 DAO 或选择弃权。
 - 风险提示：对外暴露的“更新”指令需严谨约束，避免任意覆盖。
+
+---
+
+## Solana 与 EVM（ERC）对照与差异简述
+- 状态模型：EVM 合约自带 storage；Solana Program 无状态，数据放独立账户（PDA），指令需要显式带入读写账户。
+- 权限/约束：Solana 通过 `has_one/signers/seeds/bump`、PDA 种子与账户元信息约束；租金/空间需预估。
+- 标准：ERC20/721/1155 ↔ SPL Token/Token-2022 + Metaplex Token Metadata（NFT/pNFT）。
+- 交易：Solana 支持多指令与多签名者组合，fee-payer 可与业务签名者不同。
+- 事件/索引：无原生 event log，依靠程序日志与 indexer（如 Helius）。
+
+> 可将“职责/概念”视为一致（登记、定价、支付、分账），但实现细节与约束不同，需要以 PDA/账户驱动的方式建模与实现。
 
 ---
 
@@ -573,5 +643,10 @@ export async function ensureAtaAndBalance(connection, payer, owner) {
 - NEXT_PUBLIC_IBOM_TOKEN_MINT: 项目代币的 Mint（如启用代币/激励）。
 - NEXT_PUBLIC_SONGS_COLLECTION_MINT: 歌曲合集 Collection 的 Mint。
 - NEXT_PUBLIC_PAYMENT_MINT: 稳定币的 Mint（推荐 USDC）。
+- REGISTRY_PROGRAM_ID / NEXT_PUBLIC_REGISTRY_PROGRAM_ID: ibom_registry 的 Program ID（服务端/前端）。
+- SOLANA_RPC_URL / SOLANA_COMMITMENT: 服务端 RPC 配置（默认继承 NEXT_PUBLIC_*）。
+- Helius：HELIUS_API_KEY（可选，DAS/索引），HELIUS_DEVNET=1（devnet）。
+- IPFS：NFT_STORAGE_TOKEN（可选，“上传到 IPFS”）。
+- 媒体签名：MEDIA_SIGN_SECRET、MEDIA_SIGN_TTL_MS、MEDIA_STREAM_TTL_MS（可选，签名播放）。
 
 参考代码：onchain/programs/ibom_registry/src/lib.rs
