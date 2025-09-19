@@ -1,114 +1,60 @@
-import Image from "next/image";
-
 import ConnectWallet from "@/components/ConnectWallet";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <div className="mt-6"><ConnectWallet /></div>
-        <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="font-sans min-h-screen p-8 sm:p-12">
+      <header className="flex items-center justify-between gap-4">
+        <h1 className="text-xl sm:text-2xl font-semibold">IBOM Blockchain Demo · 导航</h1>
+        <ConnectWallet />
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-        <div className="mt-6">
-          <a
-            className="rounded border px-4 py-2 inline-block hover:bg-gray-50 dark:hover:bg-gray-900"
-            href="/nft"
-          >
-            Go to 歌曲 NFT 发行 →
-          </a>
-        </div>
+      <main className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="/nft" className="block rounded border p-4 hover:bg-gray-50 dark:hover:bg-gray-900">
+          <div className="text-lg font-medium">歌曲 NFT 发行</div>
+          <ul className="mt-2 text-sm text-gray-600 space-y-1">
+            <li>· 创建集合（sized）与铸造歌曲</li>
+            <li>· 元数据构建器（预览/上传 IPFS）</li>
+            <li>· 多成员 creators（总和=100）</li>
+            <li>· 智能验证加入合集，日志诊断</li>
+            <li>· 查看合集作品（需 Helius Key）</li>
+            <li>· 铸造后可选登记版权合约</li>
+          </ul>
+        </a>
+
+        <a href="/collection" className="block rounded border p-4 hover:bg-gray-50 dark:hover:bg-gray-900">
+          <div className="text-lg font-medium">查看合集作品</div>
+          <ul className="mt-2 text-sm text-gray-600 space-y-1">
+            <li>· 输入 Collection Mint 列出作品</li>
+            <li>· 展示 mint/name/verified/元数据链接</li>
+            <li>· 使用 Helius DAS，devnet 可能有延迟</li>
+          </ul>
+        </a>
+
+        <a href="/player" className="block rounded border p-4 hover:bg-gray-50 dark:hover:bg-gray-900">
+          <div className="text-lg font-medium">签名播放（持有者鉴权）</div>
+          <ul className="mt-2 text-sm text-gray-600 space-y-1">
+            <li>· SignMessage → 获取短时签名 URL</li>
+            <li>· 持有歌曲或（可选）合集资产放行</li>
+            <li>· 演示版 302 到元数据音频地址</li>
+          </ul>
+        </a>
+
+        <a href="/registry" className="block rounded border p-4 hover:bg-gray-50 dark:hover:bg-gray-900">
+          <div className="text-lg font-medium">版权登记（前端直发）</div>
+          <ul className="mt-2 text-sm text-gray-600 space-y-1">
+            <li>· register/update Work（Anchor）</li>
+            <li>· creators（bp）总和=10000</li>
+            <li>· 可配合 /api/registry/* 服务端代签</li>
+          </ul>
+        </a>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <section className="mt-8 text-xs text-gray-600 space-y-1">
+        <div className="font-medium">环境提示</div>
+        <div>· Helius：设置 HELIUS_API_KEY（devnet 可加 HELIUS_DEVNET=1）</div>
+        <div>· IPFS：设置 NFT_STORAGE_TOKEN 以启用“上传到 IPFS”</div>
+        <div>· 媒体签名：MEDIA_SIGN_SECRET，支持 /api/media/sign & /player</div>
+      </section>
     </div>
   );
 }
